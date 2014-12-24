@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>jgrunzweig</title>
+        <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="shortcut icon" href="./theme/images/favicon.ico"/>
+        <link rel="stylesheet" href="./theme/css/main.css" type="text/css" />
+
+        <!--[if IE]>
+                <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+        <!--[if lte IE 7]>
+                <link rel="stylesheet" type="text/css" media="all" href="./css/ie.css"/>
+                <script src="./js/IE8.js" type="text/javascript"></script><![endif]-->
+
+        <!--[if lt IE 7]>
+                <link rel="stylesheet" type="text/css" media="all" href="./css/ie6.css"/><![endif]-->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js" type="text/javascript"></script>
+
+
+</head>
+
+<body id="index" class="home">
+	
+  <!-- <header id="banner" class="body"> -->
+  <!--               <h1><a href="./"><img src="http://www.launchyard.com/images/logo.png" /></a></h1> -->
+  <!--       </header> --> 
+
+  <div class="logo-bg">
+    <div class="LaunchyardDetail">
+      <p>
+        <a href=".">
+          <img src="./theme/images/logo-bg.png" width="100" height="100" alt="Graph icon">
+        </a>
+        </br>
+        <span>
+          <span class="blog-text">
+            blog
+          </span>
+          / josh grunzweig
+        </span>
+      </p>
+      <p style="margin-top:2em;">
+        <a class="btn-touch" href="./pages/about.html">about me</a>
+      </p>
+      <p style="margin-top:1em;">
+        <a class="btn-touch" href="./pages/publications.html">publications</a>
+      </p>
+      
+    <!--  <p><a id="sitesubtitle" href="./"></a></p>i -->
+   <!--    -->
+    <!--  <p><a id="aboutlink" href="./pages/about.html">about</a></p> -->
+
+    <!-- <ul> -->
+    <!--   <li><a href="./pages/about.html">about</a></li> -->
+      <!-- <li><a href="./pages/about.html">articles</a></li> -->
+<!--  -->
+<!--         <br/> -->
+<!--         <br/> -->
+<!--      -->        
+<!--       <li><a href="">Unique Technique for Iterating Through Processes</a></li> -->
+<!--      -->        
+<!--       <li><a href="">Playing With Some Old Perl2Exe PoS Malware</a></li> -->
+<!--      -->
+<!--  -->
+    <!-- </ul> -->
+
+    <!-- This belongs in the about page -->
+      <!--  -->
+      <!-- <a href="https://github.com/jgrunzweig">Github</a> -->
+      <!-- <br/> -->
+      <!--  -->
+      <!-- <a href="https://twitter.com/jgrunzweig">Twitter</a> -->
+      <!-- <br/> -->
+      <!--  -->
+      <!-- <a href="https://linkedin.com/in/jgrunzweig">Linkedin</a> -->
+      <!-- <br/> -->
+      <!--  -->
+
+<!-- <ul>
+	<li><a href="./category/malware">Malware</a></li>
+</ul>
+ -->
+    </div>
+    <div class="socialdiv">
+      <ul id="sociallist">
+        <li><a href="https://www.linkedin.com/in/jgrunzweig" target="_blank">linkedin</a></li>
+        <li><a href="https://twitter.com/jgrunzweig" target="_blank">twitter</a></li>
+        <li><a href="https://github.com/jgrunzweig" target="_blank">github</a></li>
+      </ul>
+    </div>
+  </div>
+
+        
+        
+
+    
+            <aside id="featured">
+                <div class="body">
+                    <article>
+                        <h1 class="entry-title"><a href="./posts/2014/12/unique-technique-for-iterating-through-processes/">Unique Technique for Iterating Through Processes</a></h1>
+<div class="post-info">
+	<ul>
+        <li class="vcard author">
+                 by&nbsp;<a class="url fn" href="./author/josh-grunzweig.html">Josh Grunzweig</a>
+        </li>
+        <li class="published" title="2014-12-23T00:00:00">
+          on&nbsp;Tue 23 December 2014
+        </li>
+
+	</ul>
+
+</div><!-- /.post-info --><p>Recently, I had the chance to check out one of MalwareTech's latest <a href="http://www.malwaretech.com/2014/12/phase-bot-fileless-rootkit-part-2.html">blog posts</a> on the Phase Bot. What caught my eye in particular was his mention of a track data scanner module towards the end of the post. </p>
+<p>As point of sale related malware becomes increasingly popular, the addition of such modules in widespread malware families has become more commonplace. Everyone is attempting to hop on the bandwagon it would seem. That being said, I was still quite curious to see what the referenced DLL looked like. So, I went ahead and took a look at <a href="https://www.virustotal.com/en/file/e1988a1876263837ca18b58d69028c3678dc3df51baf1721535df3204481e6a1/analysis/">1fa781b2ece5dfa36d51704c81e61e19</a>. The file was detected by 4/56 at the time of writing this (really A/V vendors?). </p>
+<p>Overall the DLL is quite straightforward. The DLLMain function spawns a new thread as expected, which includes the following infinite loop.</p>
+<p><img alt="Spawned Thread" src="./images/img21.png" /></p>
+<p>The malware iterates through all processes, searches for track data via a custom function, writes output to STDOUT, and exfiltrates via HTTP POST requests. All very similar to what we've seen before. </p>
+<p>However, one particular thing stuck out to me-- the method the DLL uses for identifying running processes on the victim machine. Almost always, we'll see malware use either <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms682629%28v=vs.85%29.aspx">EnumProcesses</a> or the <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms682489%28v=vs.85%29.aspx">CreateToolhelp32Snapshot</a> Windows API functions used for this task. </p>
+<p>Somewhat unusually, this particular piece of malware uses the low-level <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms724509%28v=vs.85%29.aspx">NtQuerySystemInformation</a> function instead. </p>
+<p><img alt="NtQuerySystemInformation" src="./images/img22.png" /></p>
+<p>As we see from the Microsoft documentation, this function has the ability to provide a wealth of information about the system its run on depending on what SYSTEM_INFORMATION_CLASS enumeration is provided in the first argument. As we can see below, we're supplying the SystemProcessesAndThreadsInformation (0x05) enumeration to this function. While this particular enumeration isn't witnessed in the MSDN documentation, we see that this enumeration is equivalent to <a href="http://winformx.florian-rappl.de/html/e6d5d5c1-8d83-199b-004f-8767439c70eb.htm">SystemProcessInformation</a>. Knowing this, we realize that this particular ...</p>
+                    </article>
+                </div>
+            </aside><!-- /#featured -->
+            
+        
+        
+
+    
+            <aside id="featured">
+                <div class="body">
+                    <article>
+                        <h1 class="entry-title"><a href="./posts/2014/08/playing-with-some-old-perl2exe-pos-malware/">Playing With Some Old Perl2Exe PoS Malware</a></h1>
+<div class="post-info">
+	<ul>
+        <li class="vcard author">
+                 by&nbsp;<a class="url fn" href="./author/josh-grunzweig.html">Josh Grunzweig</a>
+        </li>
+        <li class="published" title="2014-08-02T00:00:00">
+          on&nbsp;Sat 02 August 2014
+        </li>
+
+	</ul>
+
+</div><!-- /.post-info --><p>For this blog post, I'm going to take a look at some old Point of Sale (PoS) malware. While this sample doesn't immediately target data processed by PoS, it does with directly with a memory scraper that does. As such, I'm calling this PoS malware. Specifically, I'm going to take a look at a file that was compiled using the common <a href="http://www.indigostar.com/perl2exe.php">Perl2Exe</a> utility. The file was originally reported by Visa quite some time ago (read: back in 2009). You can see the original advisory <a href="https://usa.visa.com/download/merchants/targeted-hospitality-sector-vulnerabilities-110609.pdf">here</a>. So before you start attacking me Internet-style, let me point out that I realize this sample is very old. I actually have looked at a number of these files in the past, and was just looking for a good example that I could use for this blog post. That being said, I hope you find this blog post helpful in the event you ever stumble on some Perl2Exe malware. I personally love it when I see Perl2Exe, because I know that raw source code (with comments) is just around the corner. So let's take a look at this <a href="https://www.virustotal.com/en/file/4a9ddeab9327533e8a79feaebccb08847d992f25f4424eeaaebf622e9b075604/analysis/">sample</a>. This sample surprisingly still has an attrocious detection rate (7/53 at the time of writing) even though it has been around for almost 5 years now. Well, so be it. Before I dig into the technical details, let's take a few seconds to briefly describe what this malware is.</p>
+<p>In short, the malware is a component of a three-piece family that is used to scrape track data from the memory of a PoS machine. One component is responsible for running the other two executables (1. the memory scraper and 2. the Perl2Exe that we're discussing). A second component is responsible for parsing memory of the running processes, and ...</p>
+                    </article>
+                </div>
+ 
+<div class="paginator">
+    <div class="navButton">Page 1 / 1</div>
+</div>
+            </aside><!-- /#featured -->
+            
+        
+        <section id="extras" >
+        
+        </section><!-- /#extras -->
+	
+        <footer id="contentinfo" >
+                <address id="about" class="vcard ">
+                Proudly powered by <a href="http://getpelican.com/" target="_blank">Pelican</a>, which takes
+                great advantage of <a href="http://python.org" target="_blank">Python</a>.
+		
+                </address><!-- /#about -->
+		
+
+                
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>

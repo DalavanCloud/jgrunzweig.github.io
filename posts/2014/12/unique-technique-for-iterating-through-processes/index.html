@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <title>Unique Technique for Iterating Through Processes</title>
+        <meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="shortcut icon" href="../../../../theme/images/favicon.ico"/>
+        <link rel="stylesheet" href="../../../../theme/css/main.css" type="text/css" />
+
+        <!--[if IE]>
+                <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+        <!--[if lte IE 7]>
+                <link rel="stylesheet" type="text/css" media="all" href="../../../../css/ie.css"/>
+                <script src="../../../../js/IE8.js" type="text/javascript"></script><![endif]-->
+
+        <!--[if lt IE 7]>
+                <link rel="stylesheet" type="text/css" media="all" href="../../../../css/ie6.css"/><![endif]-->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js" type="text/javascript"></script>
+
+
+</head>
+
+<body id="index" class="home">
+	
+  <!-- <header id="banner" class="body"> -->
+  <!--               <h1><a href="../../../../"><img src="http://www.launchyard.com/images/logo.png" /></a></h1> -->
+  <!--       </header> --> 
+
+  <div class="logo-bg">
+    <div class="LaunchyardDetail">
+      <p>
+        <a href="../../../..">
+          <img src="../../../../theme/images/logo-bg.png" width="100" height="100" alt="Graph icon">
+        </a>
+        </br>
+        <span>
+          <span class="blog-text">
+            blog
+          </span>
+          / josh grunzweig
+        </span>
+      </p>
+      <p style="margin-top:2em;">
+        <a class="btn-touch" href="../../../../pages/about.html">about me</a>
+      </p>
+      <p style="margin-top:1em;">
+        <a class="btn-touch" href="../../../../pages/publications.html">publications</a>
+      </p>
+      
+    <!--  <p><a id="sitesubtitle" href="../../../../"></a></p>i -->
+   <!--    -->
+    <!--  <p><a id="aboutlink" href="../../../../pages/about.html">about</a></p> -->
+
+    <!-- <ul> -->
+    <!--   <li><a href="../../../../pages/about.html">about</a></li> -->
+      <!-- <li><a href="../../../../pages/about.html">articles</a></li> -->
+<!--  -->
+<!--         <br/> -->
+<!--         <br/> -->
+<!--      -->        
+<!--       <li><a href="">Unique Technique for Iterating Through Processes</a></li> -->
+<!--      -->        
+<!--       <li><a href="">Playing With Some Old Perl2Exe PoS Malware</a></li> -->
+<!--      -->
+<!--  -->
+    <!-- </ul> -->
+
+    <!-- This belongs in the about page -->
+      <!--  -->
+      <!-- <a href="https://github.com/jgrunzweig">Github</a> -->
+      <!-- <br/> -->
+      <!--  -->
+      <!-- <a href="https://twitter.com/jgrunzweig">Twitter</a> -->
+      <!-- <br/> -->
+      <!--  -->
+      <!-- <a href="https://linkedin.com/in/jgrunzweig">Linkedin</a> -->
+      <!-- <br/> -->
+      <!--  -->
+
+<!-- <ul>
+	<li><a href="../../../../category/malware">Malware</a></li>
+</ul>
+ -->
+    </div>
+    <div class="socialdiv">
+      <ul id="sociallist">
+        <li><a href="https://www.linkedin.com/in/jgrunzweig" target="_blank">linkedin</a></li>
+        <li><a href="https://twitter.com/jgrunzweig" target="_blank">twitter</a></li>
+        <li><a href="https://github.com/jgrunzweig" target="_blank">github</a></li>
+      </ul>
+    </div>
+  </div>
+
+<section id="content" >
+    <div class="body">
+      <article>
+        <header>
+          <h1 class="entry-title">
+            <a href="../../../../posts/2014/12/unique-technique-for-iterating-through-processes/" rel="bookmark"
+               title="Permalink to Unique Technique for Iterating Through Processes">Unique Technique for Iterating Through Processes</a></h1>
+
+        </header>
+
+        <div class="entry-content">
+<div class="post-info">
+	<ul>
+        <li class="vcard author">
+                 by&nbsp;<a class="url fn" href="../../../../author/josh-grunzweig.html">Josh Grunzweig</a>
+        </li>
+        <li class="published" title="2014-12-23T00:00:00">
+          on&nbsp;Tue 23 December 2014
+        </li>
+
+	</ul>
+
+</div><!-- /.post-info -->          <p>Recently, I had the chance to check out one of MalwareTech's latest <a href="http://www.malwaretech.com/2014/12/phase-bot-fileless-rootkit-part-2.html">blog posts</a> on the Phase Bot. What caught my eye in particular was his mention of a track data scanner module towards the end of the post. </p>
+<p>As point of sale related malware becomes increasingly popular, the addition of such modules in widespread malware families has become more commonplace. Everyone is attempting to hop on the bandwagon it would seem. That being said, I was still quite curious to see what the referenced DLL looked like. So, I went ahead and took a look at <a href="https://www.virustotal.com/en/file/e1988a1876263837ca18b58d69028c3678dc3df51baf1721535df3204481e6a1/analysis/">1fa781b2ece5dfa36d51704c81e61e19</a>. The file was detected by 4/56 at the time of writing this (really A/V vendors?). </p>
+<p>Overall the DLL is quite straightforward. The DLLMain function spawns a new thread as expected, which includes the following infinite loop.</p>
+<p><img alt="Spawned Thread" src="../../../../images/img21.png" /></p>
+<p>The malware iterates through all processes, searches for track data via a custom function, writes output to STDOUT, and exfiltrates via HTTP POST requests. All very similar to what we've seen before. </p>
+<p>However, one particular thing stuck out to me-- the method the DLL uses for identifying running processes on the victim machine. Almost always, we'll see malware use either <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms682629%28v=vs.85%29.aspx">EnumProcesses</a> or the <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms682489%28v=vs.85%29.aspx">CreateToolhelp32Snapshot</a> Windows API functions used for this task. </p>
+<p>Somewhat unusually, this particular piece of malware uses the low-level <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms724509%28v=vs.85%29.aspx">NtQuerySystemInformation</a> function instead. </p>
+<p><img alt="NtQuerySystemInformation" src="../../../../images/img22.png" /></p>
+<p>As we see from the Microsoft documentation, this function has the ability to provide a wealth of information about the system its run on depending on what SYSTEM_INFORMATION_CLASS enumeration is provided in the first argument. As we can see below, we're supplying the SystemProcessesAndThreadsInformation (0x05) enumeration to this function. While this particular enumeration isn't witnessed in the MSDN documentation, we see that this enumeration is equivalent to <a href="http://winformx.florian-rappl.de/html/e6d5d5c1-8d83-199b-004f-8767439c70eb.htm">SystemProcessInformation</a>. Knowing this, we realize that this particular call is returning a SYSTEM_PROCESS_INFORMATION structure. More specifically, this call returns an array of these structures (one per running process). </p>
+<div class="highlight"><pre><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_SYSTEM_PROCESS_INFORMATION</span> <span class="p">{</span>
+  <span class="n">ULONG</span> <span class="n">NextEntryOffset</span><span class="p">;</span>
+  <span class="n">BYTE</span> <span class="n">Reserved1</span><span class="p">[</span><span class="mi">52</span><span class="p">];</span>
+  <span class="n">PVOID</span> <span class="n">Reserved2</span><span class="p">[</span><span class="mi">3</span><span class="p">];</span>
+  <span class="n">HANDLE</span> <span class="n">UniqueProcessId</span><span class="p">;</span>
+  <span class="n">PVOID</span> <span class="n">Reserved3</span><span class="p">;</span>
+  <span class="n">ULONG</span> <span class="n">HandleCount</span><span class="p">;</span>
+  <span class="n">BYTE</span> <span class="n">Reserved4</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+  <span class="n">PVOID</span> <span class="n">Reserved5</span><span class="p">[</span><span class="mi">11</span><span class="p">];</span>
+  <span class="n">SIZE_T</span> <span class="n">PeakPagefileUsage</span><span class="p">;</span>
+  <span class="n">SIZE_T</span> <span class="n">PrivatePageCount</span><span class="p">;</span>
+  <span class="n">LARGE_INTEGER</span> <span class="n">Reserved6</span><span class="p">[</span><span class="mi">6</span><span class="p">];</span>
+<span class="p">}</span> <span class="n">SYSTEM_PROCESS_INFORMATION</span><span class="p">;</span>
+</pre></div>
+
+
+<p>The NextEntryOffset is used to iterate through the various structures. Once this data is obtained, it's simply a matter of iterating through each process ID (pid), obtaining a handle to said process, and reading through that process' memory. With some help from the Internet, I've included some example code that (more or less) replicates the functionality of this DLL to the end of this blog post. </p>
+<p>Overall, I found it fairly interesting to see a new technique in use for this particular sample. Thanks to <a href="https://twitter.com/infoseckitten">Nick Hoffman</a>, I realized we'd actually seen this technique used by BrutPOS as well a short while ago. So, it's not completely revolutionary. However, I suspect this tactic will help prevent detection/classification of this malware as PoS-specific, as many individuals are looking for the EnumProcesses and CreateToolhelp32Snapshot functions as I stated prior. Hopefully, this information helps my fellow malware analysts out there should they encounter this technique in the wild in the future.</p>
+<div class="highlight"><pre><span class="c1">// Thanks to http://pages.cs.wisc.edu/~stjones/proj/zwenum.c</span>
+<span class="c1">// Thanks to http://www.rohitab.com/discuss/topic/40626-list-processes-using-ntquerysysteminformation/</span>
+
+<span class="p">#</span><span class="k">include</span> <span class="o">&lt;</span><span class="n">stdafx</span><span class="p">.</span><span class="n">h</span><span class="o">&gt;</span>
+<span class="p">#</span><span class="k">include</span> <span class="o">&lt;</span><span class="n">Windows</span><span class="p">.</span><span class="n">h</span><span class="o">&gt;</span>
+<span class="p">#</span><span class="k">include</span> <span class="o">&lt;</span><span class="n">iostream</span><span class="o">&gt;</span>
+
+<span class="p">#</span><span class="n">define</span> <span class="n">SystemProcessAndThreadInformation</span> <span class="mh">5</span>
+
+<span class="n">using</span> <span class="n">namespace</span> <span class="n">std</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="no">LONG</span> <span class="no">KPRIORITY</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="no">NTSTATUS</span><span class="p">(</span><span class="no">WINAPI</span> <span class="o">*</span><span class="n">tNTQuerySystemInformation</span><span class="p">)(</span>
+    <span class="no">ULONG</span> <span class="n">SystemInformationClass</span><span class="p">,</span>
+    <span class="no">PVOID</span> <span class="n">SystemInformation</span><span class="p">,</span>
+    <span class="no">ULONG</span> <span class="n">SystemInformationLength</span><span class="p">,</span>
+    <span class="no">PULONG</span> <span class="n">ReturnLength</span>
+<span class="p">);</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="no">_CLIENT_ID</span> <span class="p">{</span>
+    <span class="no">DWORD</span>          <span class="n">UniqueProcess</span><span class="p">;</span>
+    <span class="no">DWORD</span>          <span class="n">UniqueThread</span><span class="p">;</span>
+<span class="p">}</span> <span class="no">CLIENT_ID</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="no">_SYSTEM_THREADS</span> <span class="p">{</span>
+    <span class="no">LARGE_INTEGER</span>  <span class="n">KernelTime</span><span class="p">;</span>
+    <span class="no">LARGE_INTEGER</span>  <span class="n">UserTime</span><span class="p">;</span>
+    <span class="no">LARGE_INTEGER</span>  <span class="n">CreateTime</span><span class="p">;</span>
+    <span class="no">ULONG</span>          <span class="n">WaitTime</span><span class="p">;</span>
+    <span class="no">PVOID</span>          <span class="n">StartAddress</span><span class="p">;</span>
+    <span class="no">CLIENT_ID</span>      <span class="n">ClientId</span><span class="p">;</span>
+    <span class="no">KPRIORITY</span>      <span class="n">Priority</span><span class="p">;</span>
+    <span class="no">KPRIORITY</span>      <span class="n">BasePriority</span><span class="p">;</span>
+    <span class="no">ULONG</span>          <span class="n">ContextSwitchCount</span><span class="p">;</span>
+    <span class="no">LONG</span>           <span class="n">State</span><span class="p">;</span>
+    <span class="no">LONG</span>           <span class="n">WaitReason</span><span class="p">;</span>
+<span class="p">}</span> <span class="no">SYSTEM_THREADS</span><span class="p">,</span> <span class="o">*</span><span class="no">PSYSTEM_THREADS</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="no">_UNICODE_STRING</span> <span class="p">{</span>
+    <span class="no">USHORT</span>         <span class="n">Length</span><span class="p">;</span>
+    <span class="no">USHORT</span>         <span class="n">MaximumLength</span><span class="p">;</span>
+    <span class="no">PWSTR</span>          <span class="n">Buffer</span><span class="p">;</span>
+<span class="p">}</span> <span class="no">UNICODE_STRING</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="no">_VM_COUNTERS</span> <span class="p">{</span>
+    <span class="no">SIZE_T</span>             <span class="n">PeakVirtualSize</span><span class="p">;</span>
+    <span class="no">SIZE_T</span>             <span class="n">VirtualSize</span><span class="p">;</span>
+    <span class="no">ULONG</span>              <span class="n">PageFaultCount</span><span class="p">;</span>
+    <span class="no">SIZE_T</span>             <span class="n">PeakWorkingSetSize</span><span class="p">;</span>
+    <span class="no">SIZE_T</span>             <span class="n">WorkingSetSize</span><span class="p">;</span>
+    <span class="no">SIZE_T</span>             <span class="n">QuotaPeakPagedPoolUsage</span><span class="p">;</span>
+    <span class="no">SIZE_T</span>             <span class="n">QuotaPagedPoolUsage</span><span class="p">;</span>
+    <span class="no">SIZE_T</span>             <span class="n">QuotaPeakNonPagedPoolUsage</span><span class="p">;</span>
+    <span class="no">SIZE_T</span>             <span class="n">QuotaNonPagedPoolUsage</span><span class="p">;</span>
+    <span class="no">SIZE_T</span>             <span class="n">PagefileUsage</span><span class="p">;</span>
+    <span class="no">SIZE_T</span>             <span class="n">PeakPagefileUsage</span><span class="p">;</span>
+<span class="p">}</span> <span class="no">VM_COUNTERS</span><span class="p">;</span>
+
+<span class="k">typedef</span> <span class="k">struct</span> <span class="no">_SYSTEM_PROCESSES</span> <span class="p">{</span>
+    <span class="no">ULONG</span>              <span class="n">NextEntryDelta</span><span class="p">;</span>
+    <span class="no">ULONG</span>              <span class="n">ThreadCount</span><span class="p">;</span>
+    <span class="no">ULONG</span>              <span class="n">Reserved1</span><span class="p">[</span><span class="mh">6</span><span class="p">];</span>
+    <span class="no">LARGE_INTEGER</span>      <span class="n">CreateTime</span><span class="p">;</span>
+    <span class="no">LARGE_INTEGER</span>      <span class="n">UserTime</span><span class="p">;</span>
+    <span class="no">LARGE_INTEGER</span>      <span class="n">KernelTime</span><span class="p">;</span>
+    <span class="no">UNICODE_STRING</span>     <span class="n">ProcessName</span><span class="p">;</span>
+    <span class="no">KPRIORITY</span>          <span class="n">BasePriority</span><span class="p">;</span>
+    <span class="no">ULONG</span>              <span class="n">ProcessId</span><span class="p">;</span>
+    <span class="no">ULONG</span>              <span class="n">InheritedFromProcessId</span><span class="p">;</span>
+    <span class="no">ULONG</span>              <span class="n">HandleCount</span><span class="p">;</span>
+    <span class="no">ULONG</span>              <span class="n">Reserved2</span><span class="p">[</span><span class="mh">2</span><span class="p">];</span>
+    <span class="no">VM_COUNTERS</span>        <span class="n">VmCounters</span><span class="p">;</span>
+    <span class="no">IO_COUNTERS</span>        <span class="n">IoCounters</span><span class="p">;</span>
+    <span class="no">SYSTEM_THREADS</span>     <span class="n">Threads</span><span class="p">[</span><span class="mh">1</span><span class="p">];</span>
+<span class="p">}</span> <span class="no">SYSTEM_PROCESSES</span><span class="p">,</span> <span class="o">*</span><span class="no">PSYSTEM_PROCESSES</span><span class="p">;</span>
+
+<span class="k">int</span> <span class="n">_tmain</span><span class="p">(</span><span class="k">int</span> <span class="n">argc</span><span class="p">,</span> <span class="no">_TCHAR</span><span class="o">*</span> <span class="n">argv</span><span class="p">[]){</span>
+
+    <span class="no">ULONG</span> <span class="n">cbBuffer</span> <span class="o">=</span> <span class="mh">0</span><span class="p">;</span>
+    <span class="no">PVOID</span> <span class="n">pBuffer</span> <span class="o">=</span> <span class="no">NULL</span><span class="p">;</span>
+    <span class="no">NTSTATUS</span> <span class="n">Status</span> <span class="o">=</span> <span class="mh">0</span><span class="n">xc0000004</span><span class="p">;</span>
+
+    <span class="n">tNTQuerySystemInformation</span> <span class="n">ntQSI</span> <span class="o">=</span> <span class="p">(</span><span class="n">tNTQuerySystemInformation</span><span class="p">)</span><span class="n">GetProcAddress</span><span class="p">(</span><span class="n">GetModuleHandle</span><span class="p">(</span><span class="no">_T</span><span class="p">(</span><span class="s">&quot;ntdll.dll&quot;</span><span class="p">)),</span> <span class="s">&quot;NtQuerySystemInformation&quot;</span><span class="p">);</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="n">ntQSI</span><span class="p">(</span><span class="n">SystemProcessAndThreadInformation</span><span class="p">,</span> <span class="mh">0</span><span class="p">,</span> <span class="mh">0</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cbBuffer</span><span class="p">)</span> <span class="o">==</span> <span class="mh">0</span><span class="n">xc0000004</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">cbBuffer</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">pBuffer</span> <span class="o">=</span> <span class="n">VirtualAlloc</span><span class="p">(</span><span class="mh">0</span><span class="p">,</span> <span class="n">cbBuffer</span><span class="p">,</span> <span class="no">MEM_COMMIT</span><span class="p">,</span> <span class="no">PAGE_EXECUTE_READWRITE</span><span class="p">);</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">)</span>
+            <span class="p">{</span>
+                <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">ntQSI</span><span class="p">(</span><span class="n">SystemProcessAndThreadInformation</span><span class="p">,</span> <span class="n">pBuffer</span><span class="p">,</span> <span class="n">cbBuffer</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">cbBuffer</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">cbBuffer</span><span class="p">)</span>
+                <span class="p">{</span>
+                    <span class="no">PSYSTEM_PROCESSES</span> <span class="n">infoP</span> <span class="o">=</span> <span class="no">NULL</span><span class="p">;</span>
+                    <span class="n">infoP</span> <span class="o">=</span> <span class="p">(</span><span class="no">PSYSTEM_PROCESSES</span><span class="p">)</span><span class="n">pBuffer</span><span class="p">;</span>
+
+                    <span class="k">while</span> <span class="p">(</span><span class="n">infoP</span><span class="p">)</span> <span class="p">{</span> 
+                        <span class="no">HANDLE</span> <span class="n">pHandle</span><span class="p">;</span>
+                        <span class="n">pHandle</span> <span class="o">=</span> <span class="n">OpenProcess</span><span class="p">(</span><span class="no">PROCESS_QUERY_INFORMATION</span> <span class="o">|</span> <span class="no">PROCESS_VM_READ</span><span class="p">,</span> <span class="mh">0</span><span class="p">,</span> <span class="n">infoP</span><span class="o">-&gt;</span><span class="n">ProcessId</span><span class="p">);</span>
+                        <span class="k">if</span><span class="p">(</span><span class="n">pHandle</span> <span class="o">&gt;</span> <span class="mh">0</span><span class="p">)</span>
+                            <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Here&#39;s where I scrape the memory for &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">infoP</span><span class="o">-&gt;</span><span class="n">ProcessId</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+                        <span class="n">CloseHandle</span><span class="p">(</span><span class="n">pHandle</span><span class="p">);</span>
+                        <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="n">infoP</span><span class="o">-&gt;</span><span class="n">NextEntryDelta</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
+                        <span class="n">infoP</span> <span class="o">=</span> <span class="p">(</span><span class="no">PSYSTEM_PROCESSES</span><span class="p">)(((</span><span class="no">LPBYTE</span><span class="p">)</span><span class="n">infoP</span><span class="p">)</span> <span class="o">+</span> <span class="n">infoP</span><span class="o">-&gt;</span><span class="n">NextEntryDelta</span><span class="p">);</span>
+                    <span class="p">}</span>
+                <span class="p">}</span>
+                <span class="n">VirtualFree</span><span class="p">(</span><span class="n">pBuffer</span><span class="p">,</span> <span class="n">cbBuffer</span><span class="p">,</span> <span class="no">MEM_RELEASE</span><span class="p">);</span>
+            <span class="p">}</span>
+
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mh">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+        </div><!-- /.entry-content -->
+
+      </article>
+    </div>
+</section>
+        <section id="extras" >
+        
+        </section><!-- /#extras -->
+	
+        <footer id="contentinfo" >
+                <address id="about" class="vcard ">
+                Proudly powered by <a href="http://getpelican.com/" target="_blank">Pelican</a>, which takes
+                great advantage of <a href="http://python.org" target="_blank">Python</a>.
+		
+                </address><!-- /#about -->
+		
+
+                
+        </footer><!-- /#contentinfo -->
+
+</body>
+</html>
