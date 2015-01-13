@@ -42,21 +42,21 @@ card
 &lt;h5&gt;Conclusions&lt;/h5&gt;
 &lt;p&gt;Overall, I think you'll agree that this is a very interesting sample for a number of reasons. Certainly the evolution of Spark is noteworthy. However, the connections between Backoff and Alina in my opinion make for the most interesting point. It's not the first time we've seen overlap between point of sale malware families, and I doubt it will be the last. That being said, these ties between arguably the three most popular malware families in this space is certainly curious. &lt;/p&gt;
 &lt;h5&gt;Indicators of Compromise&lt;/h5&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;MD5: 7644F88C2DAE396E4288E4A9F6E2247D
-SHA1: 6A7A71BF199A1BDB40564E00C7F16F858A7D064A
-SHA256: 1FABBD3D6FB5BF868EF07BE4774649C4DD3F90959EF1E4477EDD08F96DE47F03
-Install Path: %APPDATA%\Installed\windefender.exe
-Mutexes: 7YhngylKo09H (Main Executable)
-         SHELLCODE_MUTEX (explorer.exe Injected Stub)
+&lt;div class="highlight"&gt;&lt;pre&gt;MD5:           7644F88C2DAE396E4288E4A9F6E2247D
+SHA1:          6A7A71BF199A1BDB40564E00C7F16F858A7D064A
+SHA256:        1FABBD3D6FB5BF868EF07BE4774649C4DD3F90959EF1E4477EDD08F96DE47F03
+Install Path:  %APPDATA%\Installed\windefender.exe
+Mutexes:       7YhngylKo09H (Main Executable)
+               SHELLCODE_MUTEX (explorer.exe Injected Stub)
 Files Written: %APPDATA%\Installed\windefender.exe
                %APPDATA%\nsskrnl
                %APPDATA%\winserv.exe
                %APPDATA%\drv.sys (Alternatively possibly C:\drv.sys)
 Registry Keys: HKCU\Software\Microsoft\Windows\CurrentVersion\Run\windefender
                HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\identifier    
-User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; InfoPath.1.2
-URL(s): adobeflasherup1[.]com/wordpress/post.php
-        javaoracle2[.]ru/wordpress/post.php
+User-Agent:    Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; InfoPath.1.2
+URL(s):        adobeflasherup1[.]com/wordpress/post.php
+               javaoracle2[.]ru/wordpress/post.php
 &lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Josh Grunzweig</dc:creator><pubDate>Mon, 12 Jan 2015 00:00:00 -0500</pubDate><guid>tag:jgrunzweig.github.io,2015-01-12:posts/2015/01/alina-starts-to-blur-the-lines/</guid></item><item><title>Unique Technique for Iterating Through Processes</title><link>http://jgrunzweig.github.io/posts/2014/12/unique-technique-for-iterating-through-processes/</link><description>&lt;p&gt;Recently, I had the chance to check out one of MalwareTech's latest &lt;a href="http://www.malwaretech.com/2014/12/phase-bot-fileless-rootkit-part-2.html"&gt;blog posts&lt;/a&gt; on the Phase Bot. What caught my eye in particular was his mention of a track data scanner module towards the end of the post. &lt;/p&gt;
 &lt;p&gt;As point of sale related malware becomes increasingly popular, the addition of such modules in widespread malware families has become more commonplace. Everyone is attempting to hop on the bandwagon it would seem. That being said, I was still quite curious to see what the referenced DLL looked like. So, I went ahead and took a look at &lt;a href="https://www.virustotal.com/en/file/e1988a1876263837ca18b58d69028c3678dc3df51baf1721535df3204481e6a1/analysis/"&gt;1fa781b2ece5dfa36d51704c81e61e19&lt;/a&gt;. The file was detected by 4/56 at the time of writing this (really A/V vendors?). &lt;/p&gt;
 &lt;p&gt;Overall the DLL is quite straightforward. The DLLMain function spawns a new thread as expected, which includes the following infinite loop.&lt;/p&gt;
