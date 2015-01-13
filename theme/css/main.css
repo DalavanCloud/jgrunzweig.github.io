@@ -206,6 +206,7 @@ pre {   /* background-color:#ffc; */
 
 	article img{
 	/*	width: 100%; */
+		max-width: 100%;
 		display: block;
 		margin-left: 2em;
 		margin-right: auto;
