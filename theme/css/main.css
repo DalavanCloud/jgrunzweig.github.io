@@ -642,3 +642,7 @@ pre {   /* background-color:#ffc; */
 	width: 22.5%;
 	margin-left: 20px;
 }
+
+
+
+img[alt=Small Width] { width: 700px; }
