@@ -118,21 +118,21 @@
 
 </div><!-- /.post-info --><p>I've discussed Alina quite a bit in the past. Back when I worked at SpiderLabs, I did a full evolution <a href="http://blog.spiderlabs.com/2013/05/alina-shedding-some-light-on-this-malware-family.html">analysis</a>. More recently, I wrote about a <a href="http://www.nuix.com/blog/alina-continues-spread-its-wings">newer variant</a>. I've recently stumbled on a new sample and decided to spend a few hours off the clock towards analysis. For this blog post, I'm going to be referring to <a href="https://www.virustotal.com/en/file/1fabbd3d6fb5bf868ef07be4774649c4dd3f90959ef1e4477edd08f96de47f03/analysis/">this sample</a>.</p>
 <p>Some of the strings found within the sample clearly show that this sample is Alina.</p>
-<div class="highlight"><pre><span class="p">{</span><span class="err">[</span><span class="o">!</span><span class="mi">11</span><span class="o">!</span><span class="cp">]</span>}{<span class="cp">[</span><span class="o">!</span><span class="mi">4</span><span class="o">!</span><span class="cp">]</span>}
-{<span class="cp">[</span><span class="o">!</span><span class="mi">12</span><span class="o">!</span><span class="cp">]</span>}{<span class="cp">[</span><span class="o">!</span><span class="mi">10</span><span class="o">!</span><span class="cp">]</span>}http://%s:%d{<span class="cp">[</span><span class="o">!</span><span class="mi">4</span><span class="o">!</span><span class="cp">]</span>}
+<div class="highlight"><pre>{[!11!]}{[!4!]}
+{[!12!]}{[!10!]}http://%s:%d{[!4!]}
 HTTP/1.1
 POST
-{<span class="cp">[</span><span class="o">!</span><span class="mi">13</span><span class="o">!</span><span class="cp">]</span>}{<span class="cp">[</span><span class="o">!</span><span class="mi">4</span><span class="o">!</span><span class="cp">]</span>}
+{[!13!]}{[!4!]}
 Accept: application/octet-stream
 Content-Type: application/octet-stream
 Connection: close
-{<span class="cp">[</span><span class="o">!</span><span class="mi">14</span><span class="o">!</span><span class="cp">]</span>}{<span class="cp">[</span><span class="o">!</span><span class="mi">4</span><span class="o">!</span><span class="cp">]</span>}
-{<span class="cp">[</span><span class="o">!</span><span class="mi">15</span><span class="o">!</span><span class="cp">]</span>}{<span class="cp">[</span><span class="o">!</span><span class="mi">4</span><span class="o">!</span><span class="cp">]</span>}
+{[!14!]}{[!4!]}
+{[!15!]}{[!4!]}
 %%%02x
-vector<span class="nt">&lt;T&gt;</span> too long
-map/set<span class="nt">&lt;T&gt;</span> too long
-{<span class="cp">[</span><span class="o">!</span><span class="mi">16</span><span class="o">!</span><span class="cp">]</span>}{<span class="cp">[</span><span class="o">!</span><span class="mi">46</span><span class="o">!</span><span class="cp">]</span>}%s (%d)
-{<span class="cp">[</span><span class="o">!</span><span class="mi">46</span><span class="o">!</span><span class="cp">]</span>}%d{<span class="cp">[</span><span class="o">!</span><span class="mi">1</span><span class="o">!</span><span class="cp">]</span>}
+vector&lt;T&gt; too long
+map/set&lt;T&gt; too long
+{[!16!]}{[!46!]}%s (%d)
+{[!46!]}%d{[!1!]}
 Unknown::
 cards
 card
