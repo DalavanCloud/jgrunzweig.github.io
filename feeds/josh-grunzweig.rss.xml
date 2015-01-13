@@ -23,7 +23,7 @@ card
 
 
 &lt;p&gt;Upon closer inspection, we see the pipe name that is commonly associated with the &lt;a href="http://blog.spiderlabs.com/2014/12/alina-pos-malware-sparks-off-a-new-variant.html"&gt;Spark variant&lt;/a&gt;.&lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="err"&gt;\\&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="n"&gt;pipe&lt;/span&gt;&lt;span class="err"&gt;\&lt;/span&gt;&lt;span class="n"&gt;spark&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;\\.\pipe\spark
 &lt;/pre&gt;&lt;/div&gt;
 
 
