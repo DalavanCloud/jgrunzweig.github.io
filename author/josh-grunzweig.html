@@ -116,7 +116,7 @@
 
 	</ul>
 
-</div><!-- /.post-info --><p>I've discussed Alina quite a bit in the past. Back when I worked at SpiderLabs, I did a full evolution <a href="http://blog.spiderlabs.com/2013/05/alina-shedding-some-light-on-this-malware-family.html">analysis</a>. More recently, I wrote about a <a href="http://www.nuix.com/blog/alina-continues-spread-its-wings">newer variant</a>. I've recently stumbled on a new sample and decided to spend a few hours off the clock towards analysis. For this blog post, I'm going to be referring to (this sample)[https://www.virustotal.com/en/file/1fabbd3d6fb5bf868ef07be4774649c4dd3f90959ef1e4477edd08f96de47f03/analysis/].</p>
+</div><!-- /.post-info --><p>I've discussed Alina quite a bit in the past. Back when I worked at SpiderLabs, I did a full evolution <a href="http://blog.spiderlabs.com/2013/05/alina-shedding-some-light-on-this-malware-family.html">analysis</a>. More recently, I wrote about a <a href="http://www.nuix.com/blog/alina-continues-spread-its-wings">newer variant</a>. I've recently stumbled on a new sample and decided to spend a few hours off the clock towards analysis. For this blog post, I'm going to be referring to <a href="https://www.virustotal.com/en/file/1fabbd3d6fb5bf868ef07be4774649c4dd3f90959ef1e4477edd08f96de47f03/analysis/">this sample</a>.</p>
 <p>Some of the strings found within the sample clearly show that this sample is Alina.</p>
 <div class="highlight"><pre><span class="p">{</span><span class="err">[</span><span class="o">!</span><span class="mi">11</span><span class="o">!</span><span class="cp">]</span>}{<span class="cp">[</span><span class="o">!</span><span class="mi">4</span><span class="o">!</span><span class="cp">]</span>}
 {<span class="cp">[</span><span class="o">!</span><span class="mi">12</span><span class="o">!</span><span class="cp">]</span>}{<span class="cp">[</span><span class="o">!</span><span class="mi">10</span><span class="o">!</span><span class="cp">]</span>}http://%s:%d{<span class="cp">[</span><span class="o">!</span><span class="mi">4</span><span class="o">!</span><span class="cp">]</span>}
@@ -139,12 +139,14 @@ card
 </pre></div>
 
 
-<p>Upon closer inspection, we see the pipe name that is commonly associated with the (Spark variant)[http://blog.spiderlabs.com/2014/12/alina-pos-malware-sparks-off-a-new-variant.html].</p>
+<p>Upon closer inspection, we see the pipe name that is commonly associated with the <a href="http://blog.spiderlabs.com/2014/12/alina-pos-malware-sparks-off-a-new-variant.html">Spark variant</a>.</p>
 <div class="highlight"><pre><span class="err">\\</span><span class="p">.</span><span class="err">\</span><span class="n">pipe</span><span class="err">\</span><span class="n">spark</span>
 </pre></div>
 
 
-<p>However, we don't see the user-agent (UA) associated with Spark. Historically, this UA has been 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; InfoPath.1 Spark v1.1'. However, in this particular sample, we see the more generic 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; InfoPath.1.2' UA being used. Due to the named pipe being used, I'm going to venture a guess that this particular sample might be a new Spark variant. Searching for this user-agent also reveals a similar file with the hash of <a href="https://www.virustotal.com/en/file/846efb9df9536eb029184626afd2cd18a9abbeca4b3bfa07c7ab3058af367683/analysis/">846efb9df9536eb029184626afd2cd18a9abbeca4b3bfa07c7ab3058af367683</a> that appears to share characteristics with the sample we're reviewing. Compile timestamp information for the file we're looking at shows a creation time of 2014-05-23. Additionally, this other sample has a compile timestamp of 2014-08-17. This indicates that these files were likely written ...</p>
+<p>However, we don't see the user-agent (UA) associated with Spark. Historically, this UA has been 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; InfoPath.1 Spark v1.1'. However, in this particular sample, we see the more generic 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; InfoPath.1.2' UA being used. Due to the named pipe being used, I'm going to venture a guess that this particular sample might be a new Spark variant. Searching for this user-agent also reveals a similar file with the hash of <a href="https://www.virustotal.com/en/file/846efb9df9536eb029184626afd2cd18a9abbeca4b3bfa07c7ab3058af367683/analysis/">846efb9df9536eb029184626afd2cd18a9abbeca4b3bfa07c7ab3058af367683</a> that appears to share characteristics with the sample we're reviewing. Compile timestamp information for the file we're looking at shows a creation time of 2014-05-23. Additionally, this other sample has a compile timestamp of 2014-08-17. This indicates that these files were likely written quite a while ago.</p>
+<h5>Overall Functionality</h5>
+<p>Overall, this sample shares a number of characteristics with Alina ...</p>
                     </article>
                 </div>
             </aside><!-- /#featured -->
