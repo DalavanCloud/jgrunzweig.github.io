@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>jgrunzweig</title><link>http://jgrunzweig.github.io/</link><description></description><atom:link href="http://jgrunzweig.github.io/feeds/josh-grunzweig.rss.xml" rel="self"></atom:link><lastBuildDate>Mon, 12 Jan 2015 00:00:00 -0500</lastBuildDate><item><title>Alina Starts To Blur The Lines</title><link>http://jgrunzweig.github.io/posts/2015/01/alina-starts-to-blur-the-lines/</link><description>&lt;p&gt;I've discussed Alina quite a bit in the past. Back when I worked at SpiderLabs, I did a full evolution &lt;a href="http://blog.spiderlabs.com/2013/05/alina-shedding-some-light-on-this-malware-family.html"&gt;analysis&lt;/a&gt;. More recently, I wrote about a &lt;a href="http://www.nuix.com/blog/alina-continues-spread-its-wings"&gt;newer variant&lt;/a&gt;. I've recently stumbled on a new sample and decided to spend a few hours off the clock towards analysis. For this blog post, I'm going to be referring to &lt;a href="https://www.virustotal.com/en/file/1fabbd3d6fb5bf868ef07be4774649c4dd3f90959ef1e4477edd08f96de47f03/analysis/"&gt;this sample&lt;/a&gt;.&lt;/p&gt;
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>jgrunzweig</title><link>http://jgrunzweig.github.io/</link><description></description><atom:link href="http://jgrunzweig.github.io/feeds/josh-grunzweig.rss.xml" rel="self"></atom:link><lastBuildDate>Sun, 08 Mar 2015 00:00:00 -0500</lastBuildDate><item><title>New Opportunities</title><link>http://jgrunzweig.github.io/posts/2015/03/new-opportunities/</link><description>&lt;p&gt;Just a quick post for today.&lt;/p&gt;
+&lt;p&gt;It's with quite a bit of excitement that I'm announcing a change of employment. Starting today, I'll be joining the Unit 42 group within Palo Alto Networks (PAN) as a Threat Intelligence Analyst. Threat intelligence is a slight departure from my historical focus, which was more geared towards assisting on forensics investigations, but it's certainly an area that I think will be both interesting and rewarding.&lt;/p&gt;
+&lt;p&gt;The Unit 42 group is fairly new (~1 year), and I'm really looking forward to working with such an amazing group of people. The passion towards innovation and security in general is very apparent the moment you begin speaking to Unit 42 and PAN in general. I suspect we'll have some fun in the coming months and there will be some valuable and interesting research being performed. &lt;/p&gt;
+&lt;p&gt;&lt;img alt="Image 1" src="http://jgrunzweig.github.io/images/img41.png" /&gt;&lt;/p&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Josh Grunzweig</dc:creator><pubDate>Sun, 08 Mar 2015 00:00:00 -0500</pubDate><guid>tag:jgrunzweig.github.io,2015-03-08:posts/2015/03/new-opportunities/</guid></item><item><title>Alina Starts To Blur The Lines</title><link>http://jgrunzweig.github.io/posts/2015/01/alina-starts-to-blur-the-lines/</link><description>&lt;p&gt;I've discussed Alina quite a bit in the past. Back when I worked at SpiderLabs, I did a full evolution &lt;a href="http://blog.spiderlabs.com/2013/05/alina-shedding-some-light-on-this-malware-family.html"&gt;analysis&lt;/a&gt;. More recently, I wrote about a &lt;a href="http://www.nuix.com/blog/alina-continues-spread-its-wings"&gt;newer variant&lt;/a&gt;. I've recently stumbled on a new sample and decided to spend a few hours off the clock towards analysis. For this blog post, I'm going to be referring to &lt;a href="https://www.virustotal.com/en/file/1fabbd3d6fb5bf868ef07be4774649c4dd3f90959ef1e4477edd08f96de47f03/analysis/"&gt;this sample&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;Some of the strings found within the sample clearly show that this sample is Alina.&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;{[!11!]}{[!4!]}
 {[!12!]}{[!10!]}http://%s:%d{[!4!]}
@@ -66,19 +69,19 @@ URL(s):        adobeflasherup1[.]com/wordpress/post.php
 &lt;p&gt;Somewhat unusually, this particular piece of malware uses the low-level &lt;a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ms724509%28v=vs.85%29.aspx"&gt;NtQuerySystemInformation&lt;/a&gt; function instead. &lt;/p&gt;
 &lt;p&gt;&lt;img alt="NtQuerySystemInformation" src="http://jgrunzweig.github.io/images/img22.png" /&gt;&lt;/p&gt;
 &lt;p&gt;As we see from the Microsoft documentation, this function has the ability to provide a wealth of information about the system its run on depending on what SYSTEM_INFORMATION_CLASS enumeration is provided in the first argument. As we can see below, we're supplying the SystemProcessesAndThreadsInformation (0x05) enumeration to this function. While this particular enumeration isn't witnessed in the MSDN documentation, we see that this enumeration is equivalent to &lt;a href="http://winformx.florian-rappl.de/html/e6d5d5c1-8d83-199b-004f-8767439c70eb.htm"&gt;SystemProcessInformation&lt;/a&gt;. Knowing this, we realize that this particular call is returning a SYSTEM_PROCESS_INFORMATION structure. More specifically, this call returns an array of these structures (one per running process). &lt;/p&gt;
-&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;_SYSTEM_PROCESS_INFORMATION&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-  &lt;span class="n"&gt;ULONG&lt;/span&gt; &lt;span class="n"&gt;NextEntryOffset&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="n"&gt;BYTE&lt;/span&gt; &lt;span class="n"&gt;Reserved1&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;52&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
-  &lt;span class="n"&gt;PVOID&lt;/span&gt; &lt;span class="n"&gt;Reserved2&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;3&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
-  &lt;span class="n"&gt;HANDLE&lt;/span&gt; &lt;span class="n"&gt;UniqueProcessId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="n"&gt;PVOID&lt;/span&gt; &lt;span class="n"&gt;Reserved3&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="n"&gt;ULONG&lt;/span&gt; &lt;span class="n"&gt;HandleCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="n"&gt;BYTE&lt;/span&gt; &lt;span class="n"&gt;Reserved4&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;4&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
-  &lt;span class="n"&gt;PVOID&lt;/span&gt; &lt;span class="n"&gt;Reserved5&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;11&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
-  &lt;span class="n"&gt;SIZE_T&lt;/span&gt; &lt;span class="n"&gt;PeakPagefileUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="n"&gt;SIZE_T&lt;/span&gt; &lt;span class="n"&gt;PrivatePageCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-  &lt;span class="n"&gt;LARGE_INTEGER&lt;/span&gt; &lt;span class="n"&gt;Reserved6&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;SYSTEM_PROCESS_INFORMATION&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;typedef struct _SYSTEM_PROCESS_INFORMATION {
+  ULONG NextEntryOffset;
+  BYTE Reserved1[52];
+  PVOID Reserved2[3];
+  HANDLE UniqueProcessId;
+  PVOID Reserved3;
+  ULONG HandleCount;
+  BYTE Reserved4[4];
+  PVOID Reserved5[11];
+  SIZE_T PeakPagefileUsage;
+  SIZE_T PrivatePageCount;
+  LARGE_INTEGER Reserved6[6];
+} SYSTEM_PROCESS_INFORMATION;
 &lt;/pre&gt;&lt;/div&gt;
 
 
@@ -87,116 +90,116 @@ URL(s):        adobeflasherup1[.]com/wordpress/post.php
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="c1"&gt;// Thanks to http://pages.cs.wisc.edu/~stjones/proj/zwenum.c&lt;/span&gt;
 &lt;span class="c1"&gt;// Thanks to http://www.rohitab.com/discuss/topic/40626-list-processes-using-ntquerysysteminformation/&lt;/span&gt;
 
-&lt;span class="p"&gt;#&lt;/span&gt;&lt;span class="k"&gt;include&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;stdafx&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
-&lt;span class="p"&gt;#&lt;/span&gt;&lt;span class="k"&gt;include&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;Windows&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="n"&gt;h&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
-&lt;span class="p"&gt;#&lt;/span&gt;&lt;span class="k"&gt;include&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&lt;/span&gt;&lt;span class="n"&gt;iostream&lt;/span&gt;&lt;span class="o"&gt;&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;stdafx.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;Windows.h&amp;gt;&lt;/span&gt;
+&lt;span class="cp"&gt;#include &amp;lt;iostream&amp;gt;&lt;/span&gt;
 
-&lt;span class="p"&gt;#&lt;/span&gt;&lt;span class="n"&gt;define&lt;/span&gt; &lt;span class="n"&gt;SystemProcessAndThreadInformation&lt;/span&gt; &lt;span class="mh"&gt;5&lt;/span&gt;
+&lt;span class="cp"&gt;#define SystemProcessAndThreadInformation 5&lt;/span&gt;
 
-&lt;span class="n"&gt;using&lt;/span&gt; &lt;span class="n"&gt;namespace&lt;/span&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;using&lt;/span&gt; &lt;span class="k"&gt;namespace&lt;/span&gt; &lt;span class="n"&gt;std&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="no"&gt;LONG&lt;/span&gt; &lt;span class="no"&gt;KPRIORITY&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="n"&gt;LONG&lt;/span&gt; &lt;span class="n"&gt;KPRIORITY&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="no"&gt;NTSTATUS&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;WINAPI&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;tNTQuerySystemInformation&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt; &lt;span class="n"&gt;SystemInformationClass&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-    &lt;span class="no"&gt;PVOID&lt;/span&gt; &lt;span class="n"&gt;SystemInformation&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt; &lt;span class="n"&gt;SystemInformationLength&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
-    &lt;span class="no"&gt;PULONG&lt;/span&gt; &lt;span class="n"&gt;ReturnLength&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="nf"&gt;NTSTATUS&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;WINAPI&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;tNTQuerySystemInformation&lt;/span&gt;&lt;span class="p"&gt;)(&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt; &lt;span class="n"&gt;SystemInformationClass&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;PVOID&lt;/span&gt; &lt;span class="n"&gt;SystemInformation&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt; &lt;span class="n"&gt;SystemInformationLength&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+    &lt;span class="n"&gt;PULONG&lt;/span&gt; &lt;span class="n"&gt;ReturnLength&lt;/span&gt;
 &lt;span class="p"&gt;);&lt;/span&gt;
 
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="no"&gt;_CLIENT_ID&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="no"&gt;DWORD&lt;/span&gt;          &lt;span class="n"&gt;UniqueProcess&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;DWORD&lt;/span&gt;          &lt;span class="n"&gt;UniqueThread&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="no"&gt;CLIENT_ID&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;_CLIENT_ID&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;DWORD&lt;/span&gt;          &lt;span class="n"&gt;UniqueProcess&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;DWORD&lt;/span&gt;          &lt;span class="n"&gt;UniqueThread&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;CLIENT_ID&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="no"&gt;_SYSTEM_THREADS&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="no"&gt;LARGE_INTEGER&lt;/span&gt;  &lt;span class="n"&gt;KernelTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;LARGE_INTEGER&lt;/span&gt;  &lt;span class="n"&gt;UserTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;LARGE_INTEGER&lt;/span&gt;  &lt;span class="n"&gt;CreateTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;          &lt;span class="n"&gt;WaitTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;PVOID&lt;/span&gt;          &lt;span class="n"&gt;StartAddress&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;CLIENT_ID&lt;/span&gt;      &lt;span class="n"&gt;ClientId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;KPRIORITY&lt;/span&gt;      &lt;span class="n"&gt;Priority&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;KPRIORITY&lt;/span&gt;      &lt;span class="n"&gt;BasePriority&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;          &lt;span class="n"&gt;ContextSwitchCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;LONG&lt;/span&gt;           &lt;span class="n"&gt;State&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;LONG&lt;/span&gt;           &lt;span class="n"&gt;WaitReason&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="no"&gt;SYSTEM_THREADS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="no"&gt;PSYSTEM_THREADS&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;_SYSTEM_THREADS&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;LARGE_INTEGER&lt;/span&gt;  &lt;span class="n"&gt;KernelTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;LARGE_INTEGER&lt;/span&gt;  &lt;span class="n"&gt;UserTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;LARGE_INTEGER&lt;/span&gt;  &lt;span class="n"&gt;CreateTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;          &lt;span class="n"&gt;WaitTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;PVOID&lt;/span&gt;          &lt;span class="n"&gt;StartAddress&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;CLIENT_ID&lt;/span&gt;      &lt;span class="n"&gt;ClientId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;KPRIORITY&lt;/span&gt;      &lt;span class="n"&gt;Priority&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;KPRIORITY&lt;/span&gt;      &lt;span class="n"&gt;BasePriority&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;          &lt;span class="n"&gt;ContextSwitchCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;LONG&lt;/span&gt;           &lt;span class="n"&gt;State&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;LONG&lt;/span&gt;           &lt;span class="n"&gt;WaitReason&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;SYSTEM_THREADS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;PSYSTEM_THREADS&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="no"&gt;_UNICODE_STRING&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="no"&gt;USHORT&lt;/span&gt;         &lt;span class="n"&gt;Length&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;USHORT&lt;/span&gt;         &lt;span class="n"&gt;MaximumLength&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;PWSTR&lt;/span&gt;          &lt;span class="n"&gt;Buffer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="no"&gt;UNICODE_STRING&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;_UNICODE_STRING&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;USHORT&lt;/span&gt;         &lt;span class="n"&gt;Length&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;USHORT&lt;/span&gt;         &lt;span class="n"&gt;MaximumLength&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;PWSTR&lt;/span&gt;          &lt;span class="n"&gt;Buffer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;UNICODE_STRING&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="no"&gt;_VM_COUNTERS&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;PeakVirtualSize&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;VirtualSize&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;PageFaultCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;PeakWorkingSetSize&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;WorkingSetSize&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;QuotaPeakPagedPoolUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;QuotaPagedPoolUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;QuotaPeakNonPagedPoolUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;QuotaNonPagedPoolUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;PagefileUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;PeakPagefileUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="no"&gt;VM_COUNTERS&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;_VM_COUNTERS&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;PeakVirtualSize&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;VirtualSize&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;PageFaultCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;PeakWorkingSetSize&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;WorkingSetSize&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;QuotaPeakPagedPoolUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;QuotaPagedPoolUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;QuotaPeakNonPagedPoolUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;QuotaNonPagedPoolUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;PagefileUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SIZE_T&lt;/span&gt;             &lt;span class="n"&gt;PeakPagefileUsage&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;VM_COUNTERS&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="no"&gt;_SYSTEM_PROCESSES&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;NextEntryDelta&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;ThreadCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;Reserved1&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mh"&gt;6&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
-    &lt;span class="no"&gt;LARGE_INTEGER&lt;/span&gt;      &lt;span class="n"&gt;CreateTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;LARGE_INTEGER&lt;/span&gt;      &lt;span class="n"&gt;UserTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;LARGE_INTEGER&lt;/span&gt;      &lt;span class="n"&gt;KernelTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;UNICODE_STRING&lt;/span&gt;     &lt;span class="n"&gt;ProcessName&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;KPRIORITY&lt;/span&gt;          &lt;span class="n"&gt;BasePriority&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;ProcessId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;InheritedFromProcessId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;HandleCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;Reserved2&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mh"&gt;2&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
-    &lt;span class="no"&gt;VM_COUNTERS&lt;/span&gt;        &lt;span class="n"&gt;VmCounters&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;IO_COUNTERS&lt;/span&gt;        &lt;span class="n"&gt;IoCounters&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;SYSTEM_THREADS&lt;/span&gt;     &lt;span class="n"&gt;Threads&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mh"&gt;1&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
-&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="no"&gt;SYSTEM_PROCESSES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="no"&gt;PSYSTEM_PROCESSES&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+&lt;span class="k"&gt;typedef&lt;/span&gt; &lt;span class="k"&gt;struct&lt;/span&gt; &lt;span class="n"&gt;_SYSTEM_PROCESSES&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;NextEntryDelta&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;ThreadCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;Reserved1&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;6&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="n"&gt;LARGE_INTEGER&lt;/span&gt;      &lt;span class="n"&gt;CreateTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;LARGE_INTEGER&lt;/span&gt;      &lt;span class="n"&gt;UserTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;LARGE_INTEGER&lt;/span&gt;      &lt;span class="n"&gt;KernelTime&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;UNICODE_STRING&lt;/span&gt;     &lt;span class="n"&gt;ProcessName&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;KPRIORITY&lt;/span&gt;          &lt;span class="n"&gt;BasePriority&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;ProcessId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;InheritedFromProcessId&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;HandleCount&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt;              &lt;span class="n"&gt;Reserved2&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+    &lt;span class="n"&gt;VM_COUNTERS&lt;/span&gt;        &lt;span class="n"&gt;VmCounters&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;IO_COUNTERS&lt;/span&gt;        &lt;span class="n"&gt;IoCounters&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;SYSTEM_THREADS&lt;/span&gt;     &lt;span class="n"&gt;Threads&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;];&lt;/span&gt;
+&lt;span class="p"&gt;}&lt;/span&gt; &lt;span class="n"&gt;SYSTEM_PROCESSES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt;&lt;span class="n"&gt;PSYSTEM_PROCESSES&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-&lt;span class="k"&gt;int&lt;/span&gt; &lt;span class="n"&gt;_tmain&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="k"&gt;int&lt;/span&gt; &lt;span class="n"&gt;argc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;_TCHAR&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[]){&lt;/span&gt;
+&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="nf"&gt;_tmain&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="kt"&gt;int&lt;/span&gt; &lt;span class="n"&gt;argc&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;_TCHAR&lt;/span&gt;&lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="n"&gt;argv&lt;/span&gt;&lt;span class="p"&gt;[]){&lt;/span&gt;
 
-    &lt;span class="no"&gt;ULONG&lt;/span&gt; &lt;span class="n"&gt;cbBuffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;PVOID&lt;/span&gt; &lt;span class="n"&gt;pBuffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-    &lt;span class="no"&gt;NTSTATUS&lt;/span&gt; &lt;span class="n"&gt;Status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="n"&gt;xc0000004&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;ULONG&lt;/span&gt; &lt;span class="n"&gt;cbBuffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;PVOID&lt;/span&gt; &lt;span class="n"&gt;pBuffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="n"&gt;NTSTATUS&lt;/span&gt; &lt;span class="n"&gt;Status&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="mh"&gt;0xc0000004&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
-    &lt;span class="n"&gt;tNTQuerySystemInformation&lt;/span&gt; &lt;span class="n"&gt;ntQSI&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tNTQuerySystemInformation&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;GetProcAddress&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GetModuleHandle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;_T&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ntdll.dll&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)),&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;NtQuerySystemInformation&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+    &lt;span class="n"&gt;tNTQuerySystemInformation&lt;/span&gt; &lt;span class="n"&gt;ntQSI&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tNTQuerySystemInformation&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;GetProcAddress&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;GetModuleHandle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;_T&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;quot;ntdll.dll&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;)),&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;NtQuerySystemInformation&amp;quot;&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
 
-    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ntQSI&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SystemProcessAndThreadInformation&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="n"&gt;xc0000004&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+    &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ntQSI&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SystemProcessAndThreadInformation&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="mh"&gt;0xc0000004&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
     &lt;span class="p"&gt;{&lt;/span&gt;
         &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
         &lt;span class="p"&gt;{&lt;/span&gt;
-            &lt;span class="n"&gt;pBuffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;VirtualAlloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;MEM_COMMIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;PAGE_EXECUTE_READWRITE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+            &lt;span class="n"&gt;pBuffer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;VirtualAlloc&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;MEM_COMMIT&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;PAGE_EXECUTE_READWRITE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
             &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pBuffer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
             &lt;span class="p"&gt;{&lt;/span&gt;
                 &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;ntQSI&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SystemProcessAndThreadInformation&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;pBuffer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&lt;/span&gt;&lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
                 &lt;span class="p"&gt;{&lt;/span&gt;
-                    &lt;span class="no"&gt;PSYSTEM_PROCESSES&lt;/span&gt; &lt;span class="n"&gt;infoP&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="no"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-                    &lt;span class="n"&gt;infoP&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;PSYSTEM_PROCESSES&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;pBuffer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                    &lt;span class="n"&gt;PSYSTEM_PROCESSES&lt;/span&gt; &lt;span class="n"&gt;infoP&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;NULL&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                    &lt;span class="n"&gt;infoP&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PSYSTEM_PROCESSES&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;pBuffer&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 
                     &lt;span class="k"&gt;while&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;infoP&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="p"&gt;{&lt;/span&gt; 
-                        &lt;span class="no"&gt;HANDLE&lt;/span&gt; &lt;span class="n"&gt;pHandle&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-                        &lt;span class="n"&gt;pHandle&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;OpenProcess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;PROCESS_QUERY_INFORMATION&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="no"&gt;PROCESS_VM_READ&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;infoP&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;ProcessId&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
-                        &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pHandle&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+                        &lt;span class="n"&gt;HANDLE&lt;/span&gt; &lt;span class="n"&gt;pHandle&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+                        &lt;span class="n"&gt;pHandle&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;OpenProcess&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PROCESS_QUERY_INFORMATION&lt;/span&gt; &lt;span class="o"&gt;|&lt;/span&gt; &lt;span class="n"&gt;PROCESS_VM_READ&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;infoP&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;ProcessId&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                        &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pHandle&lt;/span&gt; &lt;span class="o"&gt;&amp;gt;&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
                             &lt;span class="n"&gt;cout&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="s"&gt;&amp;quot;Here&amp;#39;s where I scrape the memory for &amp;quot;&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;infoP&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;ProcessId&lt;/span&gt; &lt;span class="o"&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span class="n"&gt;endl&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
                         &lt;span class="n"&gt;CloseHandle&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pHandle&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
                         &lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="o"&gt;!&lt;/span&gt;&lt;span class="n"&gt;infoP&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;NextEntryDelta&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;break&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
-                        &lt;span class="n"&gt;infoP&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="no"&gt;PSYSTEM_PROCESSES&lt;/span&gt;&lt;span class="p"&gt;)(((&lt;/span&gt;&lt;span class="no"&gt;LPBYTE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;infoP&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;infoP&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;NextEntryDelta&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                        &lt;span class="n"&gt;infoP&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PSYSTEM_PROCESSES&lt;/span&gt;&lt;span class="p"&gt;)(((&lt;/span&gt;&lt;span class="n"&gt;LPBYTE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="n"&gt;infoP&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;infoP&lt;/span&gt;&lt;span class="o"&gt;-&amp;gt;&lt;/span&gt;&lt;span class="n"&gt;NextEntryDelta&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
                     &lt;span class="p"&gt;}&lt;/span&gt;
                 &lt;span class="p"&gt;}&lt;/span&gt;
-                &lt;span class="n"&gt;VirtualFree&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pBuffer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="no"&gt;MEM_RELEASE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
+                &lt;span class="n"&gt;VirtualFree&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;pBuffer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;cbBuffer&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;MEM_RELEASE&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;
             &lt;span class="p"&gt;}&lt;/span&gt;
 
         &lt;span class="p"&gt;}&lt;/span&gt;
     &lt;span class="p"&gt;}&lt;/span&gt;
-    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mh"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
+    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;;&lt;/span&gt;
 &lt;span class="p"&gt;}&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;</description><dc:creator xmlns:dc="http://purl.org/dc/elements/1.1/">Josh Grunzweig</dc:creator><pubDate>Tue, 23 Dec 2014 00:00:00 -0500</pubDate><guid>tag:jgrunzweig.github.io,2014-12-23:posts/2014/12/unique-technique-for-iterating-through-processes/</guid></item><item><title>Playing With Some Old Perl2Exe PoS Malware</title><link>http://jgrunzweig.github.io/posts/2014/08/playing-with-some-old-perl2exe-pos-malware/</link><description>&lt;p&gt;For this blog post, I'm going to take a look at some old Point of Sale (PoS) malware. While this sample doesn't immediately target data processed by PoS, it does with directly with a memory scraper that does. As such, I'm calling this PoS malware. Specifically, I'm going to take a look at a file that was compiled using the common &lt;a href="http://www.indigostar.com/perl2exe.php"&gt;Perl2Exe&lt;/a&gt; utility. The file was originally reported by Visa quite some time ago (read: back in 2009). You can see the original advisory &lt;a href="https://usa.visa.com/download/merchants/targeted-hospitality-sector-vulnerabilities-110609.pdf"&gt;here&lt;/a&gt;. So before you start attacking me Internet-style, let me point out that I realize this sample is very old. I actually have looked at a number of these files in the past, and was just looking for a good example that I could use for this blog post. That being said, I hope you find this blog post helpful in the event you ever stumble on some Perl2Exe malware. I personally love it when I see Perl2Exe, because I know that raw source code (with comments) is just around the corner. So let's take a look at this &lt;a href="https://www.virustotal.com/en/file/4a9ddeab9327533e8a79feaebccb08847d992f25f4424eeaaebf622e9b075604/analysis/"&gt;sample&lt;/a&gt;. This sample surprisingly still has an attrocious detection rate (7/53 at the time of writing) even though it has been around for almost 5 years now. Well, so be it. Before I dig into the technical details, let's take a few seconds to briefly describe what this malware is.&lt;/p&gt;
 &lt;p&gt;In short, the malware is a component of a three-piece family that is used to scrape track data from the memory of a PoS machine. One component is responsible for running the other two executables (1. the memory scraper and 2. the Perl2Exe that we're discussing). A second component is responsible for parsing memory of the running processes, and searching for track data. If track data is discovered, it is written to a file in the 'memdump' subdirectory that this malware creates. The third component is the one we're discussing today-- a Perl2Exe file that is responsible for encrypting any track data that was discovered by the memory scraper. We'll dig into how exactly it does that shortly. Before we can get into the specifics though, let's tear apart this Perl2Exe and get some raw source code.&lt;/p&gt;
