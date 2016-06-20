@@ -571,7 +571,7 @@ pre {   /* background-color:#ffc; */
 		}
 	}
 
-	@media (min-width:768px)and (max-width: 1920px){
+	@media (min-width:768px)and (max-width: 3920px){
 		.logo-bg{
 			position: fixed;
 			width: 22.5%;
